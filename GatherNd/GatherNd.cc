@@ -17,32 +17,39 @@ int main() {
   // op type
   const std::string op_type = "GatherNd";
   auto dtype_acl = ACL_FLOAT;
-  auto index_type_acl = ACL_INT32;
+  auto index_type_acl = ACL_INT64;
   using dtype = float;
-  using index_type = int32_t;
+  using index_type = int64_t;
   int input_rows = 10;
   int input_cols = 128;
   int index_rows = 10;
   int index_cols = 64;
 
   // input
-  const std::vector<int64_t> input_dims{input_rows * input_cols};
+  const std::vector<int64_t> input_dims{input_rows, input_cols};
   const std::vector<dtype> input_data =
-      generateRandomVector<dtype>(input_rows * input_cols, -1, 1);
+      generateRandomVector<dtype>(input_rows * input_cols, 0, 1);
   auto input = new npuTensor<dtype>(dtype_acl,
                                     input_dims.size(),
                                     input_dims.data(),
                                     ACL_FORMAT_NCHW,
                                     input_data.data());
 
-  const std::vector<int64_t> index_dims{index_rows * index_cols};
+  const std::vector<int64_t> index_dims{index_rows, index_cols, 2};
   const std::vector<index_type> index_data = generateRandomVector<index_type>(
       index_rows * index_cols, 0, input_cols - 1);
+  std::vector<index_type> index_vec;
+  for (auto i = 0; i < input_rows; i++) {
+    for (auto j = 0; j < index_cols; j++) {
+      index_vec.push_back(i);
+      index_vec.push_back(index_data[i * index_cols + j]);
+    }
+  }
   auto index = new npuTensor<index_type>(index_type_acl,
                                          index_dims.size(),
                                          index_dims.data(),
                                          ACL_FORMAT_NCHW,
-                                         index_data.data());
+                                         index_vec.data());
 
   // inputs
   std::vector<aclTensorDesc *> input_descs;
@@ -102,12 +109,12 @@ int main() {
                        ACL_MEMCPY_DEVICE_TO_HOST));
   output->Destroy();
 
-  for (int i = 0; i < index_rows; i++) {
-    for (int j = 0; j < index_cols; j++) {
-      std::cout << output_h[i * index_cols + j] << " ";
-    }
-    std::cout << std::endl;
-  }
+  // for (int i = 0; i < index_rows; i++) {
+  //   for (int j = 0; j < index_cols; j++) {
+  //     std::cout << output_h[i * index_cols + j] << " ";
+  //   }
+  //   std::cout << std::endl;
+  // }
 
   aclopDestroyAttr(attr);
 

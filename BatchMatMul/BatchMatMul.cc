@@ -11,7 +11,8 @@ int main() {
   // Get Run Mode - ACL_HOST
   aclrtRunMode runMode;
   ACL_CALL(aclrtGetRunMode(&runMode));
-  std::string run_mode_str = (runMode == ACL_DEVICE) ? "ACL_DEVICE" : "ACL_HOST";
+  std::string run_mode_str =
+      (runMode == ACL_DEVICE) ? "ACL_DEVICE" : "ACL_HOST";
   std::cout << "aclrtRunMode is : " << run_mode_str << std::endl;
 
   // op type
@@ -35,8 +36,16 @@ int main() {
   const std::vector<int64_t> y_dims{3, 2, M, N};
 
   // input - x
-  auto x1 = new npuTensor<float>(ACL_FLOAT, x1_dims.size(), x1_dims.data(), ACL_FORMAT_NCHW, x1_data.data());
-  auto x2 = new npuTensor<float>(ACL_FLOAT, x2_dims.size(), x2_dims.data(), ACL_FORMAT_NCHW, x2_data.data());
+  auto x1 = new npuTensor<float>(ACL_FLOAT,
+                                 x1_dims.size(),
+                                 x1_dims.data(),
+                                 ACL_FORMAT_NCHW,
+                                 x1_data.data());
+  auto x2 = new npuTensor<float>(ACL_FLOAT,
+                                 x2_dims.size(),
+                                 x2_dims.data(),
+                                 ACL_FORMAT_NCHW,
+                                 x2_data.data());
 
   // set inputs desc and buffer
   std::vector<aclTensorDesc *> input_descs;
@@ -47,7 +56,8 @@ int main() {
   input_buffers.emplace_back(x2->buffer);
 
   // output - y
-  auto y = new npuTensor<float>(ACL_FLOAT, y_dims.size(), y_dims.data(), ACL_FORMAT_NCHW, nullptr);
+  auto y = new npuTensor<float>(
+      ACL_FLOAT, y_dims.size(), y_dims.data(), ACL_FORMAT_NCHW, nullptr);
 
   // set output desc and buffer
   std::vector<aclTensorDesc *> output_descs;
@@ -59,16 +69,24 @@ int main() {
   auto attr = aclopCreateAttr();
   ACL_CALL(aclopSetAttrBool(attr, "adj_x1", trans_x1));
   ACL_CALL(aclopSetAttrBool(attr, "adj_x2", trans_x2));
-  
+
   // create stream
   aclrtStream stream = nullptr;
   ACL_CALL(aclrtCreateStream(&stream));
 
   std::cout << "aclopCompileAndExecute : " << op_type << std::endl;
-  ACL_CALL(aclopCompileAndExecute(op_type.c_str(), 
-            input_descs.size(), input_descs.data(), input_buffers.data(), 
-            output_descs.size(), output_descs.data(), output_buffers.data(), 
-            attr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, NULL, stream));
+  ACL_CALL(aclopCompileAndExecute(op_type.c_str(),
+                                  input_descs.size(),
+                                  input_descs.data(),
+                                  input_buffers.data(),
+                                  output_descs.size(),
+                                  output_descs.data(),
+                                  output_buffers.data(),
+                                  attr,
+                                  ACL_ENGINE_SYS,
+                                  ACL_COMPILE_SYS,
+                                  NULL,
+                                  stream));
 
   // sync and destroy stream
   ACL_CALL(aclrtSynchronizeStream(stream));

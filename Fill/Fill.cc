@@ -1,8 +1,8 @@
+#include <algorithm>  // for copy
 #include <iostream>
-#include <algorithm> // for copy
-#include <iterator> // for ostream_iterator
-#include <vector>
+#include <iterator>  // for ostream_iterator
 #include <numeric>
+#include <vector>
 
 #include "common/nputensor.h"
 
@@ -14,7 +14,8 @@ int main() {
   // Get Run Mode - ACL_HOST
   aclrtRunMode runMode;
   ACL_CALL(aclrtGetRunMode(&runMode));
-  std::string run_mode_str = (runMode == ACL_DEVICE) ? "ACL_DEVICE" : "ACL_HOST";
+  std::string run_mode_str =
+      (runMode == ACL_DEVICE) ? "ACL_DEVICE" : "ACL_HOST";
   std::cout << "aclrtRunMode is : " << run_mode_str << std::endl;
 
   // op type
@@ -29,9 +30,19 @@ int main() {
   const std::vector<int64_t> output_dims{1};
 
   // input tensor 0 - dims
-  auto input_0 = new npuTensor<int64_t>(ACL_INT64, input_0_dims.size(), input_0_dims.data(), ACL_FORMAT_NCHW, input_0_data.data(), memType::HOST);
+  auto input_0 = new npuTensor<int64_t>(ACL_INT64,
+                                        input_0_dims.size(),
+                                        input_0_dims.data(),
+                                        ACL_FORMAT_NCHW,
+                                        input_0_data.data(),
+                                        memType::HOST);
   // input tensor 1 - value
-  auto input_1 = new npuTensor<int64_t>(ACL_INT64, input_1_dims.size(), input_1_dims.data(), ACL_FORMAT_NCHW, input_1_data.data(), memType::DEVICE);
+  auto input_1 = new npuTensor<int64_t>(ACL_INT64,
+                                        input_1_dims.size(),
+                                        input_1_dims.data(),
+                                        ACL_FORMAT_NCHW,
+                                        input_1_data.data(),
+                                        memType::DEVICE);
 
   // set inputs desc and buffer
   std::vector<aclTensorDesc *> input_descs;
@@ -42,7 +53,11 @@ int main() {
   input_buffers.emplace_back(input_1->buffer);
 
   // output - out
-  auto output = new npuTensor<int64_t>(ACL_INT64, output_dims.size(), output_dims.data(), ACL_FORMAT_NCHW, nullptr);
+  auto output = new npuTensor<int64_t>(ACL_INT64,
+                                       output_dims.size(),
+                                       output_dims.data(),
+                                       ACL_FORMAT_NCHW,
+                                       nullptr);
 
   // set output desc and buffer
   std::vector<aclTensorDesc *> output_descs;
@@ -53,16 +68,24 @@ int main() {
   // attr
   auto attr = aclopCreateAttr();
   // ACL_CALL(aclopSetAttrFloat(attr, "value", value));
-  
+
   // create stream
   aclrtStream stream = nullptr;
   ACL_CALL(aclrtCreateStream(&stream));
 
   std::cout << "aclopCompileAndExecute : " << op_type << std::endl;
-  ACL_CALL(aclopCompileAndExecute(op_type.c_str(), 
-            input_descs.size(), input_descs.data(), input_buffers.data(), 
-            output_descs.size(), output_descs.data(), output_buffers.data(), 
-            attr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, NULL, stream));
+  ACL_CALL(aclopCompileAndExecute(op_type.c_str(),
+                                  input_descs.size(),
+                                  input_descs.data(),
+                                  input_buffers.data(),
+                                  output_descs.size(),
+                                  output_descs.data(),
+                                  output_buffers.data(),
+                                  attr,
+                                  ACL_ENGINE_SYS,
+                                  ACL_COMPILE_SYS,
+                                  NULL,
+                                  stream));
 
   // sync and destroy stream
   ACL_CALL(aclrtSynchronizeStream(stream));

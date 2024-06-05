@@ -11,7 +11,8 @@ int main() {
   // Get Run Mode - ACL_HOST
   aclrtRunMode runMode;
   ACL_CALL(aclrtGetRunMode(&runMode));
-  std::string run_mode_str = (runMode == ACL_DEVICE) ? "ACL_DEVICE" : "ACL_HOST";
+  std::string run_mode_str =
+      (runMode == ACL_DEVICE) ? "ACL_DEVICE" : "ACL_HOST";
   std::cout << "aclrtRunMode is : " << run_mode_str << std::endl;
 
   // op type
@@ -40,13 +41,29 @@ int main() {
   const float factor = 0.9;
 
   // input - x
-  auto x = new npuTensor<float>(ACL_FLOAT, x_dims.size(), x_dims.data(), ACL_FORMAT_NCHW, x_data.data());
-  auto sum = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, sum_data.data());
-  auto square_sum = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, square_sum_data.data());
-  auto scale = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, scale_data.data());
-  auto offset = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, offset_data.data());
-  auto mean = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, mean_data.data());
-  auto var = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, var_data.data());
+  auto x = new npuTensor<float>(
+      ACL_FLOAT, x_dims.size(), x_dims.data(), ACL_FORMAT_NCHW, x_data.data());
+  auto sum = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, sum_data.data());
+  auto square_sum = new npuTensor<float>(ACL_FLOAT,
+                                         c_dims.size(),
+                                         c_dims.data(),
+                                         ACL_FORMAT_ND,
+                                         square_sum_data.data());
+  auto scale = new npuTensor<float>(ACL_FLOAT,
+                                    c_dims.size(),
+                                    c_dims.data(),
+                                    ACL_FORMAT_ND,
+                                    scale_data.data());
+  auto offset = new npuTensor<float>(ACL_FLOAT,
+                                     c_dims.size(),
+                                     c_dims.data(),
+                                     ACL_FORMAT_ND,
+                                     offset_data.data());
+  auto mean = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, mean_data.data());
+  auto var = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, var_data.data());
 
   // set inputs desc and buffer
   std::vector<aclTensorDesc *> input_descs;
@@ -67,11 +84,16 @@ int main() {
   input_buffers.emplace_back(var->buffer);
 
   // output - y
-  auto y = new npuTensor<float>(ACL_FLOAT, x_dims.size(), x_dims.data(), ACL_FORMAT_NCHW, nullptr);
-  auto mean_out = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
-  auto var_out = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
-  auto saved_mean = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
-  auto saved_var = new npuTensor<float>(ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
+  auto y = new npuTensor<float>(
+      ACL_FLOAT, x_dims.size(), x_dims.data(), ACL_FORMAT_NCHW, nullptr);
+  auto mean_out = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
+  auto var_out = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
+  auto saved_mean = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
+  auto saved_var = new npuTensor<float>(
+      ACL_FLOAT, c_dims.size(), c_dims.data(), ACL_FORMAT_ND, nullptr);
 
   // set output desc and buffer
   std::vector<aclTensorDesc *> output_descs;
@@ -91,16 +113,24 @@ int main() {
   auto attr = aclopCreateAttr();
   ACL_CALL(aclopSetAttrFloat(attr, "factor", factor));
   ACL_CALL(aclopSetAttrFloat(attr, "epsilon", epsilon));
-  
+
   // create stream
   aclrtStream stream = nullptr;
   ACL_CALL(aclrtCreateStream(&stream));
 
   std::cout << "aclopCompileAndExecute : " << op_type << std::endl;
-  ACL_CALL(aclopCompileAndExecute(op_type.c_str(), 
-            input_descs.size(), input_descs.data(), input_buffers.data(), 
-            output_descs.size(), output_descs.data(), output_buffers.data(), 
-            attr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, NULL, stream));
+  ACL_CALL(aclopCompileAndExecute(op_type.c_str(),
+                                  input_descs.size(),
+                                  input_descs.data(),
+                                  input_buffers.data(),
+                                  output_descs.size(),
+                                  output_descs.data(),
+                                  output_buffers.data(),
+                                  attr,
+                                  ACL_ENGINE_SYS,
+                                  ACL_COMPILE_SYS,
+                                  NULL,
+                                  stream));
 
   // sync and destroy stream
   ACL_CALL(aclrtSynchronizeStream(stream));

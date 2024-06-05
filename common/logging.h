@@ -2,10 +2,10 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <string>
 #include <iomanip>
-#include <sstream>
 #include <numeric>
+#include <sstream>
+#include <string>
 
 #define LOG(status) LOG_##status.stream()
 #define LOG_INFO LogMessage(__FILE__, __FUNCTION__, __LINE__, "I")
@@ -14,10 +14,15 @@
 #define LOG_FATAL LogMessageFatal(__FILE__, __FUNCTION__, __LINE__)
 
 // VLOG()
-#define VLOG(level) VLogMessage(__FILE__, __FUNCTION__, __LINE__, level).stream()
+#define VLOG(level) \
+  VLogMessage(__FILE__, __FUNCTION__, __LINE__, level).stream()
 
-#define CHECK(x) if (!(x)) LogMessageFatal(__FILE__, __FUNCTION__, __LINE__).stream() << "Check failed: " #x << ": " // NOLINT(*)
-#define _CHECK_BINARY(x, cmp, y) CHECK((x cmp y)) << (x) << "!" #cmp << (y) << " " // NOLINT(*)
+#define CHECK(x)                                             \
+  if (!(x))                                                  \
+  LogMessageFatal(__FILE__, __FUNCTION__, __LINE__).stream() \
+      << "Check failed: " #x << ": "  // NOLINT(*)
+#define _CHECK_BINARY(x, cmp, y) \
+  CHECK((x cmp y)) << (x) << "!" #cmp << (y) << " "  // NOLINT(*)
 
 #define CHECK_EQ(x, y) _CHECK_BINARY(x, ==, y)
 #define CHECK_NE(x, y) _CHECK_BINARY(x, !=, y)

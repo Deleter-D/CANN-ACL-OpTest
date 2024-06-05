@@ -22,7 +22,7 @@ int main() {
   // input - x
   const std::vector<int64_t> x_origin_dims{4, 6, 4, 4};
   const std::vector<int64_t> x_storage_dims{4, 6, 4, 4};
-  const std::vector<float> x_data(64*6, 1);
+  const std::vector<float> x_data(64 * 6, 1);
 
   // input - y
   const std::vector<int64_t> y_origin_dims{1, 6, 1, 1};
@@ -32,28 +32,34 @@ int main() {
   // output - out
   // const std::vector<int64_t> origin_dims{4, 6, 4, 4};
   // const std::vector<int64_t> storage_dims{4, 1, 4, 4, 16};
-  std::vector<float> out_data(64*6, 0); // output = 2
+  std::vector<float> out_data(64 * 6, 0);  // output = 2
 
   // input - x
-  auto x_desc = aclCreateTensorDesc(ACL_FLOAT, x_origin_dims.size(), x_origin_dims.data(), origin_format);
+  auto x_desc = aclCreateTensorDesc(
+      ACL_FLOAT, x_origin_dims.size(), x_origin_dims.data(), origin_format);
   ACL_CALL(aclSetTensorFormat(x_desc, storage_format));
-  ACL_CALL(aclSetTensorShape(x_desc, x_storage_dims.size(), x_storage_dims.data()));
+  ACL_CALL(
+      aclSetTensorShape(x_desc, x_storage_dims.size(), x_storage_dims.data()));
   auto x_size = aclGetTensorDescSize(x_desc);
   std::cout << "x_size = " << x_size << std::endl;
-  void* x_device_ptr;
+  void *x_device_ptr;
   ACL_CALL(aclrtMalloc(&x_device_ptr, x_size, ACL_MEM_MALLOC_NORMAL_ONLY));
-  ACL_CALL(aclrtMemcpy(x_device_ptr, x_size, x_data.data(), x_size, ACL_MEMCPY_HOST_TO_DEVICE));
+  ACL_CALL(aclrtMemcpy(
+      x_device_ptr, x_size, x_data.data(), x_size, ACL_MEMCPY_HOST_TO_DEVICE));
   auto x_buffer = aclCreateDataBuffer(x_device_ptr, x_size);
 
   // input - x
-  auto y_desc = aclCreateTensorDesc(ACL_FLOAT, y_origin_dims.size(), y_origin_dims.data(), origin_format);
+  auto y_desc = aclCreateTensorDesc(
+      ACL_FLOAT, y_origin_dims.size(), y_origin_dims.data(), origin_format);
   ACL_CALL(aclSetTensorFormat(y_desc, storage_format));
-  ACL_CALL(aclSetTensorShape(y_desc, y_storage_dims.size(), y_storage_dims.data()));
+  ACL_CALL(
+      aclSetTensorShape(y_desc, y_storage_dims.size(), y_storage_dims.data()));
   auto y_size = aclGetTensorDescSize(y_desc);
   std::cout << "y_size = " << y_size << std::endl;
-  void* y_device_ptr;
+  void *y_device_ptr;
   ACL_CALL(aclrtMalloc(&y_device_ptr, y_size, ACL_MEM_MALLOC_NORMAL_ONLY));
-  ACL_CALL(aclrtMemcpy(y_device_ptr, y_size, y_data.data(), y_size, ACL_MEMCPY_HOST_TO_DEVICE));
+  ACL_CALL(aclrtMemcpy(
+      y_device_ptr, y_size, y_data.data(), y_size, ACL_MEMCPY_HOST_TO_DEVICE));
   auto y_buffer = aclCreateDataBuffer(y_device_ptr, y_size);
 
   // inputs
@@ -64,14 +70,15 @@ int main() {
   input_buffers.emplace_back(x_buffer);
   input_buffers.emplace_back(y_buffer);
 
-
   // output - out
-  auto out_desc = aclCreateTensorDesc(ACL_FLOAT, x_origin_dims.size(), x_origin_dims.data(), origin_format);
+  auto out_desc = aclCreateTensorDesc(
+      ACL_FLOAT, x_origin_dims.size(), x_origin_dims.data(), origin_format);
   ACL_CALL(aclSetTensorFormat(out_desc, storage_format));
-  ACL_CALL(aclSetTensorShape(out_desc, x_storage_dims.size(), x_storage_dims.data()));
+  ACL_CALL(aclSetTensorShape(
+      out_desc, x_storage_dims.size(), x_storage_dims.data()));
   auto out_size = aclGetTensorDescSize(out_desc);
   std::cout << "out_size = " << out_size << std::endl;
-  void* out_device_ptr;
+  void *out_device_ptr;
   ACL_CALL(aclrtMalloc(&out_device_ptr, out_size, ACL_MEM_MALLOC_NORMAL_ONLY));
   auto out_buffer = aclCreateDataBuffer(out_device_ptr, out_size);
 
@@ -90,16 +97,28 @@ int main() {
 
   // run operator
   std::cout << "aclopCompileAndExecute : " << op_type << std::endl;
-  ACL_CALL(aclopCompileAndExecute(op_type.c_str(), 
-            input_descs.size(), input_descs.data(), input_buffers.data(), 
-            output_descs.size(), output_descs.data(), output_buffers.data(), 
-            attr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, NULL, stream));
+  ACL_CALL(aclopCompileAndExecute(op_type.c_str(),
+                                  input_descs.size(),
+                                  input_descs.data(),
+                                  input_buffers.data(),
+                                  output_descs.size(),
+                                  output_descs.data(),
+                                  output_buffers.data(),
+                                  attr,
+                                  ACL_ENGINE_SYS,
+                                  ACL_COMPILE_SYS,
+                                  NULL,
+                                  stream));
 
   // sync and destroy stream
   ACL_CALL(aclrtSynchronizeStream(stream));
   ACL_CALL(aclrtDestroyStream(stream));
 
-  ACL_CALL(aclrtMemcpy(out_data.data(), out_size, out_device_ptr, out_size, ACL_MEMCPY_DEVICE_TO_HOST));
+  ACL_CALL(aclrtMemcpy(out_data.data(),
+                       out_size,
+                       out_device_ptr,
+                       out_size,
+                       ACL_MEMCPY_DEVICE_TO_HOST));
 
   std::cout << "y = [";
   for (int i = 0; i < out_data.size(); ++i) {

@@ -3,9 +3,9 @@
 
 #include "acl/acl.h"
 #include "acl/acl_op_compiler.h"
+#include "common/generator.h"
 #include "common/logging.h"
 #include "common/nputensor.h"
-#include "common/generator.h"
 
 #define ACL_CALL(msg) CHECK_EQ(reinterpret_cast<aclError>(msg), ACL_SUCCESS)
 
@@ -20,11 +20,16 @@ int main() {
   using dtype = float;
   int rows = 2;
   int cols = 3;
- 
+
   // input
   const std::vector<int64_t> input_dims{rows * cols};
-  const std::vector<dtype> input_data = generateRandomVector<dtype>(rows * cols, -1, 1);
-  auto input = new npuTensor<dtype>(dtype_acl, input_dims.size(), input_dims.data(), ACL_FORMAT_NCHW, input_data.data());
+  const std::vector<dtype> input_data =
+      generateRandomVector<dtype>(rows * cols, -1, 1);
+  auto input = new npuTensor<dtype>(dtype_acl,
+                                    input_dims.size(),
+                                    input_dims.data(),
+                                    ACL_FORMAT_NCHW,
+                                    input_data.data());
 
   // inputs
   std::vector<aclTensorDesc *> input_descs;
@@ -32,12 +37,14 @@ int main() {
   input_descs.emplace_back(input->desc);
   input_buffers.emplace_back(input->buffer);
 
-
   // output
   const std::vector<int64_t> output_dims{rows * cols};
-  auto output = new npuTensor<dtype>(dtype_acl, output_dims.size(), output_dims.data(), ACL_FORMAT_NCHW, nullptr);
+  auto output = new npuTensor<dtype>(dtype_acl,
+                                     output_dims.size(),
+                                     output_dims.data(),
+                                     ACL_FORMAT_NCHW,
+                                     nullptr);
   std::vector<dtype> output_h(rows * cols, 0);
-
 
   // outputs
   std::vector<aclTensorDesc *> output_descs;
@@ -57,10 +64,18 @@ int main() {
 
   // run operator
   std::cout << "aclopCompileAndExecute : " << op_type << std::endl;
-  ACL_CALL(aclopCompileAndExecute(op_type.c_str(), 
-            input_descs.size(), input_descs.data(), input_buffers.data(), 
-            output_descs.size(), output_descs.data(), output_buffers.data(), 
-            attr, ACL_ENGINE_SYS, ACL_COMPILE_SYS, NULL, stream));
+  ACL_CALL(aclopCompileAndExecute(op_type.c_str(),
+                                  input_descs.size(),
+                                  input_descs.data(),
+                                  input_buffers.data(),
+                                  output_descs.size(),
+                                  output_descs.data(),
+                                  output_buffers.data(),
+                                  attr,
+                                  ACL_ENGINE_SYS,
+                                  ACL_COMPILE_SYS,
+                                  NULL,
+                                  stream));
 
   // sync and destroy stream
   ACL_CALL(aclrtSynchronizeStream(stream));
@@ -68,11 +83,15 @@ int main() {
 
   output->Print("output");
   auto out_size = aclGetTensorDescSize(output->desc);
-  ACL_CALL(aclrtMemcpy(output_h.data(), out_size, output->device_ptr, out_size, ACL_MEMCPY_DEVICE_TO_HOST));
+  ACL_CALL(aclrtMemcpy(output_h.data(),
+                       out_size,
+                       output->device_ptr,
+                       out_size,
+                       ACL_MEMCPY_DEVICE_TO_HOST));
   output->Destroy();
 
-  for(int i = 0; i < rows; i++) {
-    for(int j = 0; j < cols; j++) {
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
       std::cout << output_h[i * cols + j] << " ";
     }
     std::cout << std::endl;
