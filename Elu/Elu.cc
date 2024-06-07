@@ -23,8 +23,10 @@ int main() {
 
   // input
   const std::vector<int64_t> input_dims{rows * cols};
-  const std::vector<dtype> input_data =
-      generateRandomVector<dtype>(rows * cols, -1, 1);
+  // const std::vector<dtype> input_data =
+  //     generateRandomVector<dtype>(rows * cols, -1, 1);
+  const std::vector<dtype> input_data{
+      0.94873, 0.594238, 1.51855, -2.18164, -2.97461, -2.10352};
   auto input = new npuTensor<dtype>(dtype_acl,
                                     input_dims.size(),
                                     input_dims.data(),
